@@ -153,8 +153,8 @@ tick()
 
 gui.add(parameters, 'speedFactor').min(1).max(10).step(0.001).name("Flow Speed").onFinishChange(randomize)
 gui.add(parameters, 'amplitudeFactor').min(-2).max(2).step(0.001).name("Flow Amplitude").onFinishChange(randomize)
-gui.add(material.uniforms.uFrequency.value , 'x').min(0).max(10).step(0.001).name("x Frequency").onFinishChange(randomize)
-gui.add(material.uniforms.uFrequency.value , 'y').min(0).max(10).step(0.001).name("y Frequency").onFinishChange(randomize)
+gui.add(material.uniforms.uFrequency.value , 'x').min(0).max(25).step(0.001).name("x Frequency").onFinishChange(randomize)
+gui.add(material.uniforms.uFrequency.value , 'y').min(0).max(25).step(0.001).name("y Frequency").onFinishChange(randomize)
 gui.add(material.uniforms.uOscillationFrequency , 'value').min(0).max(10).step(0.001).name("Oscillation Frequency").onFinishChange(randomize)
 gui.add(material, 'wireframe')
 
