@@ -1,24 +1,22 @@
 #define PI 3.1415926535897932384626433832795028841971693993751058209749445923078164062862089986280348253421170679
 
+uniform float uNoiseSeed;
+uniform vec2 uMouse;
 uniform float uTime;
-uniform float uPropagation;
 
 varying vec2 vUv;
-varying float vRandom;
 
 //  Classic Perlin 2D Noise 
 //  by Stefan Gustavson
 //
-vec2 fade(vec2 t) {
+vec2 fade(vec2 t)
+{
     return t*t*t*(t*(t*6.0-15.0)+10.0);
 }
 
-vec4 permute(vec4 x) {
+vec4 permute(vec4 x)
+{
     return mod(((x*34.0)+1.0)*x, 289.0);
-}
-
-float random(vec2 st) {
-    return fract(sin(dot(st.xy, vec2(12.9898,78.233))) * 43758.5453123);
 }
 
 float cnoise(vec2 P)
@@ -31,7 +29,7 @@ float cnoise(vec2 P)
     vec4 fx = Pf.xzxz;
     vec4 fy = Pf.yyww;
     vec4 i = permute(permute(ix) + iy);
-    vec4 gx = 2.0 * fract(i * 0.0243902439 * 1.7322); // 1/41 = 0.024...
+    vec4 gx = 2.0 * fract(i * 0.0243902439 * uNoiseSeed) - 1.0; // 1/41 = 0.024...
     vec4 gy = abs(gx) - 0.5;
     vec4 tx = floor(gx + 0.5);
     gx = gx - tx;
@@ -54,10 +52,8 @@ float cnoise(vec2 P)
     return 2.3 * n_xy;
 }
 
-float cnoiseRandom(vec2 P) {
-    return(
-        cnoise(P) * uPropagation
-    );
+float random(vec2 st) {
+    return fract(sin(dot(st.xy, vec2(12.9898,78.233))) * 43758.5453123);
 }
 
 vec2 rotate(vec2 uv, float rotation, vec2 mid) {
@@ -351,17 +347,29 @@ void main()
     // gl_FragColor = vec4(strength, strength, strength, 1.0); 
 
     // 50
-    // float strength = step(0.9, sin(cnoise(vUv * 10.0) * 20.0));
-    // gl_FragColor = vec4(strength, strength, strength, 1.0); 
+    vec2 changingUV = vec2(
+        vUv.x,
+        vUv.y
+    );
+    changingUV.x += uMouse.x * 0.00025;
+    changingUV.y += uMouse.y * 0.00025;
+    float strength = step(0.9, sin(cnoise(changingUV * 10.0) * sin(uTime * 0.5) * 20.0));
+    gl_FragColor = vec4(strength, strength, strength, 1.0); 
 
     // Colored
-    float strength = step(0.9, sin(cnoiseRandom(vec2(vUv.x, vUv.y) * 10.0) * 20.0));
-    vec3 blackColor = vec3(0.0);
-    vec2 modifiedvUv = vec2(
-        vUv.x - 0.5,
-        vUv.y - 0.5
-    );
-    vec3 uvColor = vec3(modifiedvUv, 0.625);
-    vec3 mixedColor = mix(blackColor, uvColor, strength);
-    gl_FragColor = vec4(mixedColor, 1.0);
+    // vec2 changingUV = vec2(
+    // vUv.x,
+    // vUv.y
+    // );
+    // changingUV.x += uMouse.x * 0.00025;
+    // changingUV.y += uMouse.y * 0.00025;
+    // float strength = step(0.9, sin(cnoise(changingUV * 10.0) * 20.0));
+    // vec3 blackColor = vec3(0.0);
+    // vec2 modifiedvUv = vec2(
+    //     vUv.x,
+    //     vUv.y
+    // );
+    // vec3 uvColor = vec3(modifiedvUv, 0.5);
+    // vec3 mixedColor = mix(blackColor, uvColor, strength);
+    // gl_FragColor = vec4(mixedColor, 1.0);
 }

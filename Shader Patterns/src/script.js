@@ -4,6 +4,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import * as dat from 'lil-gui'
 import testVertexShader from './shaders/test/vertex.glsl'
 import testFragmentShader from './shaders/test/fragment.glsl'
+import { Vector2 } from 'three'
 
 /**
  * Base
@@ -29,17 +30,6 @@ const parameters = {
 // Geometry
 const geometry = new THREE.PlaneGeometry(parameters.width, parameters.height, 32 * parameters.width, 32 * parameters.height)
 
-const count = geometry.attributes.position.count
-const randoms = new Float32Array(count)
-
-const randomize = () => {
-    for (let i = 0; i < count; i++) {
-        randoms[i] = Math.random() * 0.1
-    }  
-    
-    geometry.setAttribute('aRandom', new THREE.BufferAttribute(randoms, 1))
-}
-
 // Material
 const material = new THREE.ShaderMaterial({
     vertexShader: testVertexShader,
@@ -47,7 +37,8 @@ const material = new THREE.ShaderMaterial({
     side: THREE.DoubleSide,
     uniforms: {
         uTime: {value: 0},
-        uPropagation: {value: 0}
+        uNoiseSeed: {value: 1},
+        uMouse: {value: new Vector2(0,0)}
     },
     // wireframe: true
 })
@@ -55,19 +46,6 @@ const material = new THREE.ShaderMaterial({
 // Mesh
 const mesh = new THREE.Mesh(geometry, material)
 scene.add(mesh)
-
-material.uniforms.uPropagation.value = 0
-
-const propagate = () => {
-    setInterval(() => {
-        if (material.uniforms.uPropagation.value < 2) {
-            material.uniforms.uPropagation.value += 0.001
-            propagate()
-        }
-    }, 10)
-}
-
-propagate()
 
 /**
  * Sizes
@@ -114,18 +92,33 @@ const renderer = new THREE.WebGLRenderer({
 renderer.setSize(sizes.width, sizes.height)
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
 
+// Mouse
+document.addEventListener('mousemove', (client) => {
+    material.uniforms.uMouse.value.x = client.x - sizes.width * 0.5
+    material.uniforms.uMouse.value.y = client.y
+})
+
 /**
  * Animate
  */
 const clock = new THREE.Clock()
 
+let resetTime = 0
+let prevTime = 0
+
 const tick = () =>
 {
     const elapsedTime = clock.getElapsedTime()
+    resetTime = elapsedTime
 
-    randomize()
-    
-    // update materials
+    if ((resetTime - prevTime) >= Math.PI*2) {
+        prevTime = resetTime
+        resetTime = 0
+        console.log('change')
+        material.uniforms.uNoiseSeed.value = Math.random()*100 + 1
+    }
+
+    // Update materials
     material.uniforms.uTime.value = elapsedTime
 
     // Update controls

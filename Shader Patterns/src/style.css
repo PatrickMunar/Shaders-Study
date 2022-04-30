@@ -8,6 +8,7 @@ html,
 body
 {
     overflow: hidden;
+    font-size: 20px;
 }
 
 .webgl
@@ -17,3 +18,5 @@ body
     left: 0;
     outline: none;
 }
+
+
