@@ -9,7 +9,7 @@ import testFragmentShader from './shaders/test/fragment.glsl'
  * Base
  */
 // Debug
-const gui = new dat.GUI()
+// const gui = new dat.GUI()
 
 // Canvas
 const canvas = document.querySelector('canvas.webgl')
@@ -20,19 +20,54 @@ const scene = new THREE.Scene()
 /**
  * Test mesh
  */
+// Parameters
+const parameters = {
+    width: 20,
+    height: 20,
+}
+
 // Geometry
-const geometry = new THREE.PlaneGeometry(1, 1, 32, 32)
+const geometry = new THREE.PlaneGeometry(parameters.width, parameters.height, 32 * parameters.width, 32 * parameters.height)
+
+const count = geometry.attributes.position.count
+const randoms = new Float32Array(count)
+
+const randomize = () => {
+    for (let i = 0; i < count; i++) {
+        randoms[i] = Math.random() * 0.1
+    }  
+    
+    geometry.setAttribute('aRandom', new THREE.BufferAttribute(randoms, 1))
+}
 
 // Material
 const material = new THREE.ShaderMaterial({
     vertexShader: testVertexShader,
     fragmentShader: testFragmentShader,
-    side: THREE.DoubleSide
+    side: THREE.DoubleSide,
+    uniforms: {
+        uTime: {value: 0},
+        uPropagation: {value: 0}
+    },
+    // wireframe: true
 })
 
 // Mesh
 const mesh = new THREE.Mesh(geometry, material)
 scene.add(mesh)
+
+material.uniforms.uPropagation.value = 0
+
+const propagate = () => {
+    setInterval(() => {
+        if (material.uniforms.uPropagation.value < 2) {
+            material.uniforms.uPropagation.value += 0.001
+            propagate()
+        }
+    }, 10)
+}
+
+propagate()
 
 /**
  * Sizes
@@ -62,12 +97,13 @@ window.addEventListener('resize', () =>
  */
 // Base camera
 const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 100)
-camera.position.set(0.25, - 0.25, 1)
+camera.position.set(0, 0, 5)
 scene.add(camera)
 
 // Controls
 const controls = new OrbitControls(camera, canvas)
 controls.enableDamping = true
+controls.enabled = false
 
 /**
  * Renderer
@@ -81,8 +117,17 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
 /**
  * Animate
  */
+const clock = new THREE.Clock()
+
 const tick = () =>
 {
+    const elapsedTime = clock.getElapsedTime()
+
+    randomize()
+    
+    // update materials
+    material.uniforms.uTime.value = elapsedTime
+
     // Update controls
     controls.update()
 
