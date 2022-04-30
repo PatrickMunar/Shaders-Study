@@ -4,7 +4,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import * as dat from 'lil-gui'
 import testVertexShader from './shaders/test/vertex.glsl'
 import testFragmentShader from './shaders/test/fragment.glsl'
-import { Vector2 } from 'three'
+import { Matrix3, Vector2 } from 'three'
 
 /**
  * Base
@@ -98,6 +98,18 @@ document.addEventListener('mousemove', (client) => {
     material.uniforms.uMouse.value.y = - (client.y - sizes.width * 0.5)
 })
 
+let isUTimePaused = false
+
+// Click
+document.addEventListener('click', () => {
+    if (isUTimePaused == true) {
+        isUTimePaused = false
+    }
+    else {
+        isUTimePaused = true
+    }
+})
+
 /**
  * Animate
  */
@@ -105,20 +117,34 @@ const clock = new THREE.Clock()
 
 let resetTime = 0
 let prevTime = 0
+let backTrackTime = 0
+let prevBackTrackTime = 0
+let pauseTime = 0
 
 const tick = () =>
 {
     const elapsedTime = clock.getElapsedTime()
     resetTime = elapsedTime
 
-    if ((resetTime - prevTime) >= Math.PI*2) {
-        prevTime += Math.PI*2
-        console.log('change')
-        material.uniforms.uNoiseSeed.value = Math.random()*100 + 1
-    }
-
     // Update materials
-    material.uniforms.uTime.value = elapsedTime
+    if (isUTimePaused == false) {
+        pauseTime = 0
+        material.uniforms.uTime.value = elapsedTime - backTrackTime
+        if (backTrackTime !== 0) {
+            prevBackTrackTime = backTrackTime
+        }
+        if ((resetTime - prevTime - backTrackTime) >= Math.PI*2) {
+            prevTime += Math.PI*2
+            console.log('change')
+            material.uniforms.uNoiseSeed.value = Math.random()*100 + 1
+        }
+    }
+    else {
+        if (pauseTime == 0) {
+            pauseTime = elapsedTime
+        }
+        backTrackTime = elapsedTime - pauseTime + prevBackTrackTime
+    }
 
     // Update controls
     controls.update()
