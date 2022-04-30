@@ -95,7 +95,7 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
 // Mouse
 document.addEventListener('mousemove', (client) => {
     material.uniforms.uMouse.value.x = client.x - sizes.width * 0.5
-    material.uniforms.uMouse.value.y = client.y
+    material.uniforms.uMouse.value.y = - (client.y - sizes.width * 0.5)
 })
 
 /**
