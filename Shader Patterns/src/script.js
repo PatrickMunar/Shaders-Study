@@ -112,8 +112,7 @@ const tick = () =>
     resetTime = elapsedTime
 
     if ((resetTime - prevTime) >= Math.PI*2) {
-        prevTime = resetTime
-        resetTime = 0
+        prevTime += Math.PI*2
         console.log('change')
         material.uniforms.uNoiseSeed.value = Math.random()*100 + 1
     }
