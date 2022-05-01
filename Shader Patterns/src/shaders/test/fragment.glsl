@@ -29,7 +29,7 @@ float cnoise(vec2 P)
     vec4 fx = Pf.xzxz;
     vec4 fy = Pf.yyww;
     vec4 i = permute(permute(ix) + iy);
-    vec4 gx = 2.0 * fract(i * 0.0243902439 * uNoiseSeed) - 1.0; // 1/41 = 0.024...
+    vec4 gx = 2.0 * fract(i * 0.0243902439 * uNoiseSeed) - 1.0; // 1/41 = 0.024... + inject uNoiseSeed
     vec4 gy = abs(gx) - 0.5;
     vec4 tx = floor(gx + 0.5);
     gx = gx - tx;

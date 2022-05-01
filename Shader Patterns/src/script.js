@@ -98,7 +98,7 @@ document.addEventListener('mousemove', (client) => {
     material.uniforms.uMouse.value.y = - (client.y - sizes.width * 0.5)
 })
 
-let isUTimePaused = false
+let isUTimePaused = true
 
 // Click
 document.addEventListener('click', () => {
@@ -116,7 +116,7 @@ document.addEventListener('click', () => {
 const clock = new THREE.Clock()
 
 let resetTime = 0
-let prevTime = 0
+let cycleTime = 0
 let backTrackTime = 0
 let prevBackTrackTime = 0
 let pauseTime = 0
@@ -133,9 +133,8 @@ const tick = () =>
         if (backTrackTime !== 0) {
             prevBackTrackTime = backTrackTime
         }
-        if ((resetTime - prevTime - backTrackTime) >= Math.PI*2) {
-            prevTime += Math.PI*2
-            console.log('change')
+        if ((resetTime - cycleTime - backTrackTime) >= Math.PI*2) {
+            cycleTime += Math.PI*2
             material.uniforms.uNoiseSeed.value = Math.random()*100 + 1
         }
     }
